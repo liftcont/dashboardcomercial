@@ -190,7 +190,7 @@ class RDStationAPI {
       contact_email: d.contacts?.[0]?.emails?.[0]?.email || '',
       created_at: d.created_at,
       updated_at: d.updated_at,
-      status: d.closed_at ? (d.win ? 'won' : 'lost') : (d.hold ? 'paused' : 'open'),
+      status: (d.closed_at ? (d.win ? 'won' : 'lost') : (d.hold ? 'paused' : 'open')) as 'open' | 'won' | 'lost' | 'paused',
       deal_source: d.deal_source ? { id: d.deal_source.id, name: d.deal_source.name } : null,
       deal_stage: d.deal_stage ? { id: d.deal_stage.id, name: d.deal_stage.name } : null
     }));
@@ -224,7 +224,7 @@ class RDStationAPI {
         contact_email: d.contacts?.[0]?.emails?.[0]?.email || '',
         created_at: d.created_at,
         updated_at: d.updated_at,
-        status: d.closed_at ? (d.win ? 'won' : 'lost') : (d.hold ? 'paused' : 'open'),
+        status: (d.closed_at ? (d.win ? 'won' : 'lost') : (d.hold ? 'paused' : 'open')) as 'open' | 'won' | 'lost' | 'paused',
         deal_source: d.deal_source ? { id: d.deal_source.id, name: d.deal_source.name } : null,
         deal_stage: d.deal_stage ? { id: d.deal_stage.id, name: d.deal_stage.name } : null
       }));

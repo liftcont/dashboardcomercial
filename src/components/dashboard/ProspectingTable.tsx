@@ -18,13 +18,13 @@ export function ProspectingTable() {
     const updatedAt = d.updated_at ? d.updated_at.split('T')[0] : null;
 
     if (startDate && endDate) {
-      isValid = (createdAt >= startDate && createdAt <= endDate) || (updatedAt && updatedAt >= startDate && updatedAt <= endDate);
+      isValid = (createdAt >= startDate && createdAt <= endDate) || (updatedAt !== null && updatedAt >= startDate && updatedAt <= endDate);
     } else if (startDate) {
-      isValid = (createdAt >= startDate) || (updatedAt && updatedAt >= startDate);
+      isValid = (createdAt >= startDate) || (updatedAt !== null && updatedAt >= startDate);
     } else if (endDate) {
-      isValid = (createdAt <= endDate) || (updatedAt && updatedAt <= endDate);
+      isValid = (createdAt <= endDate) || (updatedAt !== null && updatedAt <= endDate);
     }
-    return isValid;
+    return Boolean(isValid);
   });
 
   // Helper to categorize by week of the month based on day (1-7, 8-14, 15-21, 22+)
