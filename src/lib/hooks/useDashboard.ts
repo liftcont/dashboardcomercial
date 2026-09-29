@@ -107,6 +107,13 @@ export function useDashboard() {
     if (!loading.deals) {
       fetchAllData();
     }
+
+    // Auto-refresh a cada 30 minutos
+    const interval = setInterval(() => {
+      fetchAllData();
+    }, 30 * 60 * 1000); // 30 minutos em milissegundos
+
+    return () => clearInterval(interval);
   }, [selectedPipelineId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
