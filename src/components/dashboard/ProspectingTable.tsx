@@ -124,14 +124,6 @@ export function ProspectingTable() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">Lista</td>
-                {metrics.lista.map((val, i) => (
-                  <td key={i} className={`px-4 py-3 text-center ${i === 4 ? 'font-bold text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}>
-                    {val}
-                  </td>
-                ))}
-              </tr>
-              <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                 <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">Oportunidades</td>
                 {metrics.oportunidades.map((val, i) => (
                   <td key={i} className={`px-4 py-3 text-center ${i === 4 ? 'font-bold text-indigo-600 dark:text-indigo-400' : 'text-gray-600 dark:text-gray-300'}`}>
