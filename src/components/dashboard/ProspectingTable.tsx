@@ -79,39 +79,30 @@ export function ProspectingTable() {
     }
   });
 
-  const renderCell = (val: number, weekIndex: number, type: 'contatos' | 'oportunidades' | 'proposta' | 'ganho') => {
-    let goal = 0;
-    if (type === 'contatos') goal = weekIndex === 4 ? 1200 : 300;
-    if (type === 'oportunidades') goal = weekIndex === 4 ? 40 : 10;
-    if (type === 'proposta') goal = weekIndex === 4 ? 4 : 1;
-    if (type === 'ganho') goal = weekIndex === 4 ? 1 : 0;
+  const weekGoals: Record<'contatos' | 'oportunidades' | 'proposta' | 'ganho', number> = {
+    contatos: 300,
+    oportunidades: 10,
+    proposta: 1,
+    ganho: 1,
+  };
 
-    const isTotal = weekIndex === 4;
+  const monthGoals: Record<'contatos' | 'oportunidades' | 'proposta' | 'ganho', number> = {
+    contatos: 1200,
+    oportunidades: 40,
+    proposta: 4,
+    ganho: 1,
+  };
+
+  const renderVal = (val: number, type: 'contatos' | 'oportunidades' | 'proposta' | 'ganho', isTotal: boolean) => {
+    const goal = isTotal ? monthGoals[type] : weekGoals[type];
     const achieved = goal > 0 && val >= goal;
-    
-    // For weeks in ganho (which don't have a weekly goal)
-    if (type === 'ganho' && !isTotal) {
-      return (
-        <div className="flex flex-col items-center justify-center">
-          <span className="text-green-600 dark:text-green-400 font-medium">{val}</span>
-        </div>
-      );
-    }
-
-    const colorClass = achieved 
-      ? 'text-green-600 dark:text-green-400 font-bold' 
-      : (isTotal ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-600 dark:text-gray-300 font-medium');
-
-    return (
-      <div className="flex flex-col items-center justify-center">
-        <span className={colorClass}>{val}</span>
-        {(goal > 0) && (
-          <span className="text-[9px] text-gray-400 dark:text-gray-500 mt-1 uppercase tracking-wider">
-            Meta: {goal}
-          </span>
-        )}
-      </div>
-    );
+    const baseClass = isTotal ? 'font-bold' : 'font-medium';
+    const colorClass = achieved
+      ? 'text-green-600 dark:text-green-400'
+      : isTotal
+        ? 'text-indigo-600 dark:text-indigo-400'
+        : type === 'ganho' ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-300';
+    return <span className={`${baseClass} ${colorClass}`}>{val}</span>;
   };
 
   return (
@@ -155,46 +146,33 @@ export function ProspectingTable() {
             <thead className="text-xs text-gray-500 uppercase border-b dark:border-gray-700">
               <tr>
                 <th className="px-4 py-4 font-semibold">Métrica</th>
-                <th className="px-4 py-4 font-semibold text-center w-32">1ª Semana</th>
-                <th className="px-4 py-4 font-semibold text-center w-32">2ª Semana</th>
-                <th className="px-4 py-4 font-semibold text-center w-32">3ª Semana</th>
-                <th className="px-4 py-4 font-semibold text-center w-32">4ª Semana</th>
-                <th className="px-4 py-4 font-bold text-center text-indigo-600 dark:text-indigo-400 w-32">Total</th>
+                <th className="px-4 py-4 font-semibold text-center">1ª Semana</th>
+                <th className="px-4 py-4 font-semibold text-center">2ª Semana</th>
+                <th className="px-4 py-4 font-semibold text-center">3ª Semana</th>
+                <th className="px-4 py-4 font-semibold text-center">4ª Semana</th>
+                <th className="px-4 py-4 font-bold text-center text-indigo-600 dark:text-indigo-400">Total</th>
+                <th className="px-4 py-4 font-bold text-center text-orange-500 dark:text-orange-400">Meta</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">Contatos</td>
-                {metrics.contatos.map((val, i) => (
-                  <td key={i} className="px-4 py-3">
-                    {renderCell(val, i, 'contatos')}
+              {(['contatos', 'oportunidades', 'proposta', 'ganho'] as const).map((type) => (
+                <tr key={type} className={type === 'ganho' ? 'bg-green-50/30 dark:bg-green-900/10 hover:bg-green-50 dark:hover:bg-green-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}>
+                  <td className={`px-4 py-3 font-medium capitalize ${type === 'ganho' ? 'text-green-700 dark:text-green-400' : 'text-gray-900 dark:text-white'}`}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
                   </td>
-                ))}
-              </tr>
-              <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">Oportunidades</td>
-                {metrics.oportunidades.map((val, i) => (
-                  <td key={i} className="px-4 py-3">
-                    {renderCell(val, i, 'oportunidades')}
+                  {metrics[type].slice(0, 4).map((val, i) => (
+                    <td key={i} className="px-4 py-3 text-center">
+                      {renderVal(val, type, false)}
+                    </td>
+                  ))}
+                  <td className="px-4 py-3 text-center">
+                    {renderVal(metrics[type][4], type, true)}
                   </td>
-                ))}
-              </tr>
-              <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">Proposta</td>
-                {metrics.proposta.map((val, i) => (
-                  <td key={i} className="px-4 py-3">
-                    {renderCell(val, i, 'proposta')}
+                  <td className="px-4 py-3 text-center font-semibold text-orange-500 dark:text-orange-400">
+                    {monthGoals[type]}
                   </td>
-                ))}
-              </tr>
-              <tr className="bg-green-50/30 dark:bg-green-900/10 hover:bg-green-50 dark:hover:bg-green-900/20">
-                <td className="px-4 py-3 font-medium text-green-700 dark:text-green-400">Ganho</td>
-                {metrics.ganho.map((val, i) => (
-                  <td key={i} className="px-4 py-3">
-                    {renderCell(val, i, 'ganho')}
-                  </td>
-                ))}
-              </tr>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
