@@ -59,14 +59,18 @@ export function useDashboard() {
         }
       }
 
-      const [dealsRes, stagesRes, contactsRes, campaignsRes] = await Promise.all([
+      const [dealsRes, stagesRes, contactsRes, campaignsRes, prospectingDealsRes, prospectingStagesRes] = await Promise.all([
         api.getAllDeals(currentPipelineId || undefined),
         api.getFunnelStages(currentPipelineId || undefined),
         api.getContacts(1, 500).catch(() => ({ data: [] })),
         api.getCampaigns(1, 100).catch(() => ({ data: [] })),
+        api.getAllDeals('6a91b08e165be40025782aa1').catch(() => []),
+        api.getFunnelStages('6a91b08e165be40025782aa1').catch(() => [])
       ]);
 
       setDeals(dealsRes);
+      useRDStationStore.getState().setProspectingDeals(prospectingDealsRes);
+      useRDStationStore.getState().setProspectingStages(prospectingStagesRes);
       setFunnelStages(stagesRes);
       setContacts(contactsRes.data || []);
       setCampaigns(campaignsRes.data || []);

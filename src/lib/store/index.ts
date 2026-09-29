@@ -47,6 +47,10 @@ export interface RDStationState {
   logout: () => void;
   setContacts: (contacts: RDStationContact[]) => void;
   setDeals: (deals: RDStationDeal[]) => void;
+  prospectingDeals: RDStationDeal[];
+  setProspectingDeals: (deals: RDStationDeal[]) => void;
+  prospectingStages: RDStationFunnelStage[];
+  setProspectingStages: (stages: RDStationFunnelStage[]) => void;
   setCampaigns: (campaigns: RDStationCampaign[]) => void;
   setFunnelStages: (stages: RDStationFunnelStage[]) => void;
   setPipelines: (pipelines: any[]) => void;
@@ -84,6 +88,8 @@ export const useRDStationStore = create<RDStationState>()(
 
       contacts: [],
       deals: [],
+      prospectingDeals: [],
+      prospectingStages: [],
       campaigns: [],
       funnelStages: [],
       pipelines: [],
@@ -133,6 +139,8 @@ export const useRDStationStore = create<RDStationState>()(
 
       setContacts: (contacts) => set({ contacts }),
       setDeals: (deals) => set({ deals }),
+      setProspectingDeals: (prospectingDeals) => set({ prospectingDeals }),
+      setProspectingStages: (prospectingStages) => set({ prospectingStages }),
       setCampaigns: (campaigns) => set({ campaigns }),
       setFunnelStages: (funnelStages) => set({ funnelStages }),
       setPipelines: (pipelines) => set({ pipelines }),

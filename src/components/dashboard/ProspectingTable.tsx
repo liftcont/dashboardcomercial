@@ -3,13 +3,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { useRDStationStore } from '@/lib/store';
 
 export function ProspectingTable() {
-  const { deals, funnelStages, startDate, endDate, setStartDate, setEndDate, pipelines, selectedPipelineId } = useRDStationStore();
+  const { prospectingDeals, prospectingStages, startDate, endDate, setStartDate, setEndDate, pipelines, selectedPipelineId } = useRDStationStore();
 
   // Find the selected pipeline name to adjust logic if needed, but we'll try to be generic/robust.
   const pipeline = pipelines.find(p => p.id === selectedPipelineId);
   
   // Filter deals for "advogados" origin and current date range
-  const advogadosDeals = deals.filter(d => {
+  const advogadosDeals = prospectingDeals.filter(d => {
     const sourceName = d.deal_source?.name?.toLowerCase() || '';
     if (!sourceName.includes('advogado')) return false;
 
@@ -50,7 +50,7 @@ export function ProspectingTable() {
     metrics.lista[week]++;
     metrics.lista[4]++;
 
-    const stage = funnelStages.find(s => s.id === deal.deal_stage?.id);
+    const stage = prospectingStages.find(s => s.id === deal.deal_stage?.id);
     const order = stage ? stage.order : 1;
     const stageName = stage ? stage.name.toLowerCase() : (deal.deal_stage?.name?.toLowerCase() || '');
 
