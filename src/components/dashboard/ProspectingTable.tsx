@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { useRDStationStore } from '@/lib/store';
 
 export function ProspectingTable() {
-  const { prospectingDeals, prospectingStages, startDate, endDate, setStartDate, setEndDate, pipelines, selectedPipelineId } = useRDStationStore();
+  const { prospectingDeals, prospectingStages, pipelines, selectedPipelineId } = useRDStationStore();
+
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = String(today.getMonth() + 1).padStart(2, '0');
+  const currentDay = String(today.getDate()).padStart(2, '0');
+  
+  const [localStartDate, setLocalStartDate] = useState(`${currentYear}-${currentMonth}-01`);
+  const [localEndDate, setLocalEndDate] = useState(`${currentYear}-${currentMonth}-${currentDay}`);
 
   // Find the selected pipeline name to adjust logic if needed, but we'll try to be generic/robust.
   const pipeline = pipelines.find(p => p.id === selectedPipelineId);
@@ -17,12 +25,12 @@ export function ProspectingTable() {
     const createdAt = d.created_at.split('T')[0];
     const updatedAt = d.updated_at ? d.updated_at.split('T')[0] : null;
 
-    if (startDate && endDate) {
-      isValid = (createdAt >= startDate && createdAt <= endDate) || (updatedAt !== null && updatedAt >= startDate && updatedAt <= endDate);
-    } else if (startDate) {
-      isValid = (createdAt >= startDate) || (updatedAt !== null && updatedAt >= startDate);
-    } else if (endDate) {
-      isValid = (createdAt <= endDate) || (updatedAt !== null && updatedAt <= endDate);
+    if (localStartDate && localEndDate) {
+      isValid = (createdAt >= localStartDate && createdAt <= localEndDate) || (updatedAt !== null && updatedAt >= localStartDate && updatedAt <= localEndDate);
+    } else if (localStartDate) {
+      isValid = (createdAt >= localStartDate) || (updatedAt !== null && updatedAt >= localStartDate);
+    } else if (localEndDate) {
+      isValid = (createdAt <= localEndDate) || (updatedAt !== null && updatedAt <= localEndDate);
     }
     return Boolean(isValid);
   });
@@ -86,8 +94,8 @@ export function ProspectingTable() {
             <input 
               type="date"
               className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              value={localStartDate}
+              onChange={(e) => setLocalStartDate(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-1 bg-white dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700">
@@ -95,13 +103,13 @@ export function ProspectingTable() {
             <input 
               type="date"
               className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              value={localEndDate}
+              onChange={(e) => setLocalEndDate(e.target.value)}
             />
           </div>
-          {(startDate || endDate) && (
+          {(localStartDate || localEndDate) && (
             <button 
-              onClick={() => { setStartDate(''); setEndDate(''); }} 
+              onClick={() => { setLocalStartDate(''); setLocalEndDate(''); }} 
               className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 px-2"
             >
               Limpar
