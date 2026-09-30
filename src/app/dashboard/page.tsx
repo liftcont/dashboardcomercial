@@ -173,12 +173,12 @@ function DashboardContent() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <KPISummaryBlocks deals={deals} />
 
         <ProspectingTable />
 
-        <div className="mb-8">
+        <div className="mb-3">
           {funnelData.length > 0 && (
             <FunnelChart 
               data={funnelData} 

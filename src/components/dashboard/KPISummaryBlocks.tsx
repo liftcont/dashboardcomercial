@@ -74,7 +74,7 @@ export function KPISummaryBlocks({ deals }: Props) {
   if (!years.includes(currentYear)) years.unshift(currentYear);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
       {/* ── ANNUAL BLOCK ── */}
       <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-6">
         <div className="flex items-center justify-between mb-6">
@@ -112,8 +112,8 @@ export function KPISummaryBlocks({ deals }: Props) {
       </div>
 
       {/* ── MONTHLY BLOCK ── */}
-      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-4">
+        <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wider">
             Apurado Mensal
           </h2>

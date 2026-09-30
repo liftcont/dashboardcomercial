@@ -106,7 +106,7 @@ export function ProspectingTable() {
   };
 
   return (
-    <Card className="mb-8 border-indigo-100 dark:border-indigo-900 shadow-sm">
+    <Card className="mb-3 border-indigo-100 dark:border-indigo-900 shadow-sm">
       <CardHeader className="bg-indigo-50/50 dark:bg-indigo-900/20 border-b border-indigo-50 dark:border-indigo-900/50 pb-3 flex flex-row items-center justify-between">
         <CardTitle className="text-lg text-indigo-900 dark:text-indigo-300">
           Desempenho de Prospecção (Origem: Advogados)
