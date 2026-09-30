@@ -34,11 +34,17 @@ export function SheetKPIBlocks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    axios.get('/api/sheets')
+  const fetchSheet = () => {
+    axios.get(`/api/sheets?t=${Date.now()}`)
       .then((r) => setData(r.data))
       .catch(() => setError('Falha ao carregar dados da planilha'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSheet();
+    const interval = setInterval(fetchSheet, 2 * 60 * 1000); // atualiza a cada 2 min
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {

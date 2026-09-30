@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 
-const SHEET_CSV_URL =
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Real-time export URL (no Google publish delay) + fallback to pub URL
+const SHEET_EXPORT_URL =
+  'https://docs.google.com/spreadsheets/d/1famSTBWeCCZ5YZ-XbOgISTTBLuWOWDp4tqtktEKA6vc/export?format=csv&gid=0';
+const SHEET_PUB_URL =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vR8vlPk5V_akZDFhSLzpzXrBion8XePjtyAnDBsMEJwFQTAkXMObNfzFG31kaZZahnY5SejniG1TsdL/pub?output=csv&gid=0';
 
 // Proper CSV row parser that handles quoted fields containing commas
@@ -25,7 +31,14 @@ function parseCSVRow(row: string): string[] {
 
 export async function GET() {
   try {
-    const res = await fetch(SHEET_CSV_URL, { next: { revalidate: 1800 } });
+    let res = await fetch(`${SHEET_EXPORT_URL}&t=${Date.now()}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      res = await fetch(`${SHEET_PUB_URL}&t=${Date.now()}`, {
+        cache: 'no-store',
+      });
+    }
     if (!res.ok) throw new Error('Falha ao buscar planilha');
 
     const text = await res.text();
@@ -52,7 +65,6 @@ export async function GET() {
       // Clientes
       const cMes = row[6]?.trim();
       const fech = parseInt(row[7]?.trim() || '0', 10);
-      // Conversão: the CSV parser now handles quoted commas correctly
       const convRaw = row[8]?.trim() || '';
       const conv = convRaw.includes('DIV') || convRaw === '' ? '—' : convRaw;
       if (cMes) clientes.push({ mes: cMes, fechamentos: isNaN(fech) ? 0 : fech, conversao: conv });
@@ -65,15 +77,21 @@ export async function GET() {
     const totalConversaoRaw = totalRow?.[8]?.trim() || '';
     const totalConversao = totalConversaoRaw.includes('DIV') || totalConversaoRaw === '' ? '—' : totalConversaoRaw;
 
-    return NextResponse.json({
-      oportunidades,
-      totalOportunidades,
-      clientes,
-      totalFechamentos: isNaN(totalFechamentos) ? 0 : totalFechamentos,
-      totalConversao,
-    });
+    return NextResponse.json(
+      {
+        oportunidades,
+        totalOportunidades,
+        clientes,
+        totalFechamentos: isNaN(totalFechamentos) ? 0 : totalFechamentos,
+        totalConversao,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        },
+      }
+    );
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
-
