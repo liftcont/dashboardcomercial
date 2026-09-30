@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/hooks/useDashboard';
 import { KPICard } from '@/components/dashboard/KPICard';
+import { KPISummaryBlocks } from '@/components/dashboard/KPISummaryBlocks';
 import {
   FunnelChart,
   TimeSeriesChart,
@@ -38,6 +39,7 @@ function DashboardContent() {
     loading,
     error,
     metrics,
+    deals,
     funnelData,
     campaignPerformance,
     timeSeriesData,
@@ -172,33 +174,7 @@ function DashboardContent() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {metrics && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-            <KPICard
-              title="Total de Negócios"
-              value={metrics.totalDeals.toLocaleString('pt-BR')}
-              icon={<Target className="h-6 w-6" />}
-              iconColor="text-blue-600 dark:text-blue-400"
-              bgColor="bg-blue-100 dark:bg-blue-900/30"
-            />
-            <KPICard
-              title="Negócios Ganhos"
-              value={metrics.wonDeals.toLocaleString('pt-BR')}
-              icon={<CheckCircle className="h-6 w-6" />}
-              iconColor="text-green-600 dark:text-green-400"
-              bgColor="bg-green-100 dark:bg-green-900/30"
-              trend="up"
-            />
-            <KPICard
-              title="Negócios Perdidos"
-              value={metrics.lostDeals.toLocaleString('pt-BR')}
-              icon={<XCircle className="h-6 w-6" />}
-              iconColor="text-red-600 dark:text-red-400"
-              bgColor="bg-red-100 dark:bg-red-900/30"
-              trend="down"
-            />
-          </div>
-        )}
+        <KPISummaryBlocks deals={deals} />
 
         <ProspectingTable />
 
