@@ -15,42 +15,37 @@ interface SheetData {
 }
 
 const monthNamesMap: Record<string, string> = {
-  janeiro: 'Janeiro', fevereiro: 'Fevereiro', março: 'Março', marco: 'Março',
+  janeiro: 'Janeiro', fevereiro: 'Fevereiro', marco: 'Março', março: 'Março',
   abril: 'Abril', maio: 'Maio', junho: 'Junho', julho: 'Julho',
   agosto: 'Agosto', setembro: 'Setembro', outubro: 'Outubro',
   novembro: 'Novembro', dezembro: 'Dezembro',
 };
 
 function normalize(mes: string) {
-  return monthNamesMap[mes.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] || mes;
+  const key = mes.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  return monthNamesMap[key] || mes;
 }
 
-const currentMonthIndex = new Date().getMonth(); // 0-indexed
+// idx 0 = Janeiro = month 0 in JS Date; September = 8
+const currentMonthIndex = new Date().getMonth();
 
 export function SheetKPIBlocks() {
   const [data, setData] = useState<SheetData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get('/api/sheets');
-      setData(res.data);
-    } catch {
-      setError('Falha ao carregar dados da planilha');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    axios.get('/api/sheets')
+      .then((r) => setData(r.data))
+      .catch(() => setError('Falha ao carregar dados da planilha'))
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         {[1, 2].map((i) => (
-          <div key={i} className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-4 animate-pulse h-64" />
+          <div key={i} className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm p-4 animate-pulse h-64" />
         ))}
       </div>
     );
@@ -68,34 +63,31 @@ export function SheetKPIBlocks() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
 
       {/* ── BLOCO 1: Oportunidades geradas em 2026 ── */}
-      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div className="bg-orange-500 dark:bg-orange-600 px-4 py-2 text-center">
+      <div className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="bg-slate-700 dark:bg-slate-900 px-4 py-2 text-center">
           <h2 className="text-sm font-bold text-white uppercase tracking-wide">
             Oportunidades geradas em 2026
           </h2>
         </div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-orange-100 dark:bg-orange-900/30">
-              <th className="px-4 py-2 text-left font-semibold text-orange-800 dark:text-orange-300">Mês</th>
-              <th className="px-4 py-2 text-center font-semibold text-orange-800 dark:text-orange-300">Total</th>
+            <tr className="bg-slate-100 dark:bg-slate-800/60">
+              <th className="px-4 py-2 text-left font-semibold text-slate-600 dark:text-slate-300">Mês</th>
+              <th className="px-4 py-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
             {data.oportunidades.map((row, idx) => {
               const isCurrent = idx === currentMonthIndex;
               return (
-                <tr
-                  key={row.mes}
-                  className={isCurrent
-                    ? 'bg-orange-50 dark:bg-orange-900/20 font-semibold'
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'}
-                >
-                  <td className={`px-4 py-1.5 capitalize ${isCurrent ? 'text-orange-700 dark:text-orange-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                <tr key={row.mes} className={isCurrent
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700/20'}>
+                  <td className={`px-4 py-1.5 ${isCurrent ? 'font-semibold text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}`}>
                     {normalize(row.mes)}
-                    {isCurrent && <span className="ml-2 text-[10px] uppercase bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200 rounded px-1">atual</span>}
+                    {isCurrent && <span className="ml-2 text-[9px] uppercase bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded px-1 py-0.5">atual</span>}
                   </td>
-                  <td className={`px-4 py-1.5 text-center font-medium ${row.total === 0 ? 'text-gray-400' : isCurrent ? 'text-orange-600 dark:text-orange-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                  <td className={`px-4 py-1.5 text-center font-medium ${row.total === 0 ? 'text-gray-400 dark:text-gray-600' : isCurrent ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-800 dark:text-gray-200'}`}>
                     {row.total || '—'}
                   </td>
                 </tr>
@@ -103,64 +95,67 @@ export function SheetKPIBlocks() {
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-orange-500 dark:bg-orange-600">
+            <tr className="bg-slate-700 dark:bg-slate-900">
               <td className="px-4 py-2 font-bold text-white">Total</td>
-              <td className="px-4 py-2 text-center font-bold text-white">{data.totalOportunidades}</td>
+              <td className="px-4 py-2 text-center font-bold text-indigo-300">{data.totalOportunidades}</td>
             </tr>
           </tfoot>
         </table>
       </div>
 
       {/* ── BLOCO 2: Clientes Alcançados ── */}
-      <div className="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-        <div className="bg-blue-600 dark:bg-blue-700 px-4 py-2 text-center">
+      <div className="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div className="bg-slate-700 dark:bg-slate-900 px-4 py-2 text-center">
           <h2 className="text-sm font-bold text-white uppercase tracking-wide">
             Clientes Alcançados
           </h2>
         </div>
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-blue-100 dark:bg-blue-900/30">
-              <th className="px-4 py-2 text-left font-semibold text-blue-800 dark:text-blue-300">Mês</th>
-              <th className="px-4 py-2 text-center font-semibold text-blue-800 dark:text-blue-300">Fechamentos</th>
-              <th className="px-4 py-2 text-center font-semibold text-blue-800 dark:text-blue-300">Conversão</th>
+            <tr className="bg-slate-100 dark:bg-slate-800/60">
+              <th className="px-4 py-2 text-left font-semibold text-slate-600 dark:text-slate-300">Mês</th>
+              <th className="px-4 py-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">Fechamentos</th>
+              <th className="px-4 py-2 text-center font-semibold text-indigo-600 dark:text-indigo-400">Conversão</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
             {data.clientes.map((row, idx) => {
               const isCurrent = idx === currentMonthIndex;
-              const convNum = parseFloat(row.conversao.replace(',', '.'));
+              const convNum = parseFloat(row.conversao.replace(',', '.').replace('%', ''));
               const highConv = !isNaN(convNum) && convNum >= 30;
+              // ensure % symbol present
+              const convDisplay = row.conversao === '—' ? '—'
+                : row.conversao.includes('%') ? row.conversao
+                : `${row.conversao}%`;
               return (
-                <tr
-                  key={row.mes}
-                  className={isCurrent
-                    ? 'bg-blue-50 dark:bg-blue-900/20 font-semibold'
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/30'}
-                >
-                  <td className={`px-4 py-1.5 capitalize ${isCurrent ? 'text-blue-700 dark:text-blue-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                <tr key={row.mes} className={isCurrent
+                  ? 'bg-indigo-50 dark:bg-indigo-900/20'
+                  : 'hover:bg-gray-50 dark:hover:bg-gray-700/20'}>
+                  <td className={`px-4 py-1.5 ${isCurrent ? 'font-semibold text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}`}>
                     {normalize(row.mes)}
-                    {isCurrent && <span className="ml-2 text-[10px] uppercase bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded px-1">atual</span>}
+                    {isCurrent && <span className="ml-2 text-[9px] uppercase bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 rounded px-1 py-0.5">atual</span>}
                   </td>
-                  <td className={`px-4 py-1.5 text-center font-medium ${row.fechamentos === 0 ? 'text-gray-400' : isCurrent ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-gray-200'}`}>
+                  <td className={`px-4 py-1.5 text-center font-medium ${row.fechamentos === 0 ? 'text-gray-400 dark:text-gray-600' : isCurrent ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-800 dark:text-gray-200'}`}>
                     {row.fechamentos || '—'}
                   </td>
                   <td className={`px-4 py-1.5 text-center font-medium ${
-                    row.conversao === '—' ? 'text-gray-400' :
-                    highConv ? 'text-green-600 dark:text-green-400' :
+                    row.conversao === '—' ? 'text-gray-400 dark:text-gray-600' :
+                    highConv ? 'text-green-600 dark:text-green-400 font-bold' :
                     'text-gray-700 dark:text-gray-300'
                   }`}>
-                    {row.conversao === '—' ? '—' : `${row.conversao}`}
+                    {convDisplay}
                   </td>
                 </tr>
               );
             })}
           </tbody>
           <tfoot>
-            <tr className="bg-blue-600 dark:bg-blue-700">
+            <tr className="bg-slate-700 dark:bg-slate-900">
               <td className="px-4 py-2 font-bold text-white">Total</td>
-              <td className="px-4 py-2 text-center font-bold text-white">{data.totalFechamentos}</td>
-              <td className="px-4 py-2 text-center font-bold text-white">{data.totalConversao}</td>
+              <td className="px-4 py-2 text-center font-bold text-indigo-300">{data.totalFechamentos}</td>
+              <td className="px-4 py-2 text-center font-bold text-indigo-300">
+                {data.totalConversao === '—' ? '—' : data.totalConversao.includes('%') ? data.totalConversao : `${data.totalConversao}%`}
+              </td>
             </tr>
           </tfoot>
         </table>
