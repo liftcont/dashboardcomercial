@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useDashboard } from '@/lib/hooks/useDashboard';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPISummaryBlocks } from '@/components/dashboard/KPISummaryBlocks';
+import { SheetKPIBlocks } from '@/components/dashboard/SheetKPIBlocks';
 import {
   FunnelChart,
   TimeSeriesChart,
@@ -175,6 +176,8 @@ function DashboardContent() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <KPISummaryBlocks deals={deals} />
+
+        <SheetKPIBlocks />
 
         <div className="mb-3">
           {funnelData.length > 0 && (
