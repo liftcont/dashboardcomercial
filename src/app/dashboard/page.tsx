@@ -59,11 +59,11 @@ function DashboardContent() {
   } = useDashboard();
 
   const [mounted, setMounted] = useState(false);
-  const [zoom, setZoom] = useState(65);
+  const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
     setMounted(true);
-    const savedZoom = localStorage.getItem('lift_dashboard_zoom');
+    const savedZoom = localStorage.getItem('lift_zoom_v2');
     if (savedZoom) {
       setZoom(Number(savedZoom));
     }
@@ -81,7 +81,7 @@ function DashboardContent() {
   useEffect(() => {
     if (mounted) {
       document.documentElement.style.zoom = `${zoom}%`;
-      localStorage.setItem('lift_dashboard_zoom', String(zoom));
+      localStorage.setItem('lift_zoom_v2', String(zoom));
     }
   }, [zoom, mounted]);
 
@@ -149,16 +149,16 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
-        <div className="max-w-full mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img src="/logo-lift.svg" alt="Lift Logo" className="h-7 w-7 object-contain" />
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">LIFT Dashboard</h1>
+              <img src="/logo-lift.svg" alt="Lift Logo" className="h-8 w-8 object-contain" />
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">LIFT Dashboard</h1>
               
               {pipelines && pipelines.length > 0 && (
-                <div className="ml-3 pl-3 flex gap-3 border-l border-gray-200 dark:border-gray-700">
+                <div className="ml-4 pl-4 flex gap-4 border-l border-gray-200 dark:border-gray-700">
                   <select
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-2 py-1.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
                     value={selectedPipelineId || ''}
                     onChange={(e) => setSelectedPipelineId(e.target.value)}
                     disabled={loading.deals}
@@ -170,7 +170,7 @@ function DashboardContent() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-200">
                 <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase mr-1">Escala:</span>
                 <button
@@ -189,22 +189,22 @@ function DashboardContent() {
                   +
                 </button>
               </div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+              <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
                 Atualizado: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
               </span>
               <Button variant="outline" size="sm" onClick={fetchAllData} disabled={loading.contacts || loading.deals || loading.campaigns}>
-                <RefreshCw className={`h-3.5 w-3.5 ${loading.contacts || loading.deals || loading.campaigns ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${loading.contacts || loading.deals || loading.campaigns ? 'animate-spin' : ''}`} />
                 Atualizar
               </Button>
               <Button variant="ghost" size="sm" onClick={logout}>
-                <LogOut className="h-3.5 w-3.5" />
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-full mx-auto px-4 sm:px-6 py-2">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <KPISummaryBlocks deals={deals} />
 
         <SheetKPIBlocks />
