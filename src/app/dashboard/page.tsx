@@ -176,8 +176,6 @@ function DashboardContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <KPISummaryBlocks deals={deals} />
 
-        <ProspectingTable />
-
         <div className="mb-3">
           {funnelData.length > 0 && (
             <FunnelChart 
@@ -217,6 +215,8 @@ function DashboardContent() {
             />
           )}
         </div>
+
+        <ProspectingTable />
 
         {funnelData.length > 0 && (
           <div className="mb-8">
