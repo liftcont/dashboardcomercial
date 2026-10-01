@@ -6,6 +6,7 @@ import { useDashboard } from '@/lib/hooks/useDashboard';
 import { KPICard } from '@/components/dashboard/KPICard';
 import { KPISummaryBlocks } from '@/components/dashboard/KPISummaryBlocks';
 import { SheetKPIBlocks } from '@/components/dashboard/SheetKPIBlocks';
+import { ClientMovementBlocks } from '@/components/dashboard/ClientMovementBlocks';
 import {
   FunnelChart,
   TimeSeriesChart,
@@ -208,6 +209,8 @@ function DashboardContent() {
         <KPISummaryBlocks deals={deals} />
 
         <SheetKPIBlocks />
+
+        <ClientMovementBlocks deals={deals} />
 
         <div className="mb-3">
           {funnelData.length > 0 && (
