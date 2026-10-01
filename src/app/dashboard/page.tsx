@@ -29,9 +29,22 @@ import {
   LogOut,
   AlertCircle,
   Loader2,
+  Tv,
+  Play,
+  Pause,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+const SLIDES = [
+  { id: 0, title: 'Metas & Visão Executiva', label: '1. Visão Geral' },
+  { id: 1, title: 'Evolução Mensal (Planilha 2026)', label: '2. Planilha' },
+  { id: 2, title: 'Funil Comercial de Vendas e Detalhamento', label: '3. Funil' },
+  { id: 3, title: 'Desempenho de Prospecção Ativa (Advogados)', label: '4. Prospecção' },
+];
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -62,11 +75,21 @@ function DashboardContent() {
   const [mounted, setMounted] = useState(false);
   const [zoom, setZoom] = useState(100);
 
+  // Modo TV / Slides State
+  const [isTvMode, setIsTvMode] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(60);
+
   useEffect(() => {
     setMounted(true);
     const savedZoom = localStorage.getItem('lift_zoom_v2');
     if (savedZoom) {
       setZoom(Number(savedZoom));
+    }
+    const savedTv = localStorage.getItem('lift_tv_mode');
+    if (searchParams.get('tv') === 'true' || savedTv === 'true') {
+      setIsTvMode(true);
     }
     const code = searchParams.get('code');
     const authError = searchParams.get('error');
@@ -85,6 +108,83 @@ function DashboardContent() {
       localStorage.setItem('lift_zoom_v2', String(zoom));
     }
   }, [zoom, mounted]);
+
+  // Salva preferência do Modo TV
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('lift_tv_mode', isTvMode ? 'true' : 'false');
+    }
+  }, [isTvMode, mounted]);
+
+  // Timer de 60 segundos por slide
+  useEffect(() => {
+    if (!isTvMode) return;
+
+    const timer = setInterval(() => {
+      if (!isPaused) {
+        setSecondsLeft((sec) => {
+          if (sec <= 1) {
+            setCurrentSlide((s) => (s + 1) % SLIDES.length);
+            return 60;
+          }
+          return sec - 1;
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isTvMode, isPaused]);
+
+  // Listener para controle remoto da TV e teclado
+  useEffect(() => {
+    if (!isTvMode) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Botão OK (Enter) ou Espaço ou botão Play/Pause de controle remoto
+      if (
+        e.key === 'Enter' ||
+        e.key === ' ' ||
+        e.keyCode === 13 ||
+        e.keyCode === 32 ||
+        e.keyCode === 179 ||
+        e.keyCode === 19
+      ) {
+        e.preventDefault();
+        setIsPaused((p) => !p);
+      } else if (e.key === 'ArrowRight' || e.keyCode === 39 || e.keyCode === 417) {
+        // Seta Direita no controle da TV
+        e.preventDefault();
+        setCurrentSlide((s) => (s + 1) % SLIDES.length);
+        setSecondsLeft(60);
+      } else if (e.key === 'ArrowLeft' || e.keyCode === 37 || e.keyCode === 412) {
+        // Seta Esquerda no controle da TV
+        e.preventDefault();
+        setCurrentSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length);
+        setSecondsLeft(60);
+      } else if (
+        e.key === 'Escape' ||
+        e.keyCode === 27 ||
+        e.keyCode === 10009 ||
+        e.keyCode === 461
+      ) {
+        // ESC ou Voltar no controle da TV
+        setIsTvMode(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isTvMode]);
+
+  const goToNextSlide = () => {
+    setCurrentSlide((s) => (s + 1) % SLIDES.length);
+    setSecondsLeft(60);
+  };
+
+  const goToPrevSlide = () => {
+    setCurrentSlide((s) => (s - 1 + SLIDES.length) % SLIDES.length);
+    setSecondsLeft(60);
+  };
 
   if (!mounted) {
     return (
@@ -147,6 +247,231 @@ function DashboardContent() {
     );
   }
 
+  const funnelDateFilter = (
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700">
+        <span className="text-[10px] text-gray-500 font-medium px-1 uppercase">De</span>
+        <input 
+          type="date"
+          className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
+      </div>
+      <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700">
+        <span className="text-[10px] text-gray-500 font-medium px-1 uppercase">Até</span>
+        <input 
+          type="date"
+          className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </div>
+      {(startDate || endDate) && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => { setStartDate(''); setEndDate(''); }} 
+          className="text-gray-500 h-8 px-2"
+        >
+          Limpar
+        </Button>
+      )}
+    </div>
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // RENDERIZAÇÃO: MODO TV (SLIDES AUTOMÁTICOS)
+  // ═══════════════════════════════════════════════════════════
+  if (isTvMode) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex flex-col justify-between select-none">
+        {/* Top TV Bar */}
+        <header className="bg-gray-850 bg-gray-900/90 backdrop-blur border-b border-gray-800 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between">
+            {/* Logo & Slide Info */}
+            <div className="flex items-center gap-3">
+              <img src="/logo-lift.svg" alt="Lift Logo" className="h-7 w-7 object-contain" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm font-bold text-white tracking-wide">LIFT TV</h1>
+                  <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    Slide {currentSlide + 1} de {SLIDES.length}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 font-medium">{SLIDES[currentSlide].title}</p>
+              </div>
+            </div>
+
+            {/* Slide Navigation Pills */}
+            <div className="flex items-center gap-1.5 bg-gray-800/80 p-1 rounded-xl border border-gray-700/60">
+              {SLIDES.map((slide, idx) => (
+                <button
+                  key={slide.id}
+                  onClick={() => {
+                    setCurrentSlide(idx);
+                    setSecondsLeft(60);
+                  }}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    currentSlide === idx
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700/50'
+                  }`}
+                >
+                  {slide.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Controls (Remote TV & Mouse) */}
+            <div className="flex items-center gap-2">
+              {/* Timer / Pause Badge */}
+              <div
+                onClick={() => setIsPaused((p) => !p)}
+                className={`cursor-pointer px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                  isPaused
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
+                    : 'bg-gray-800 text-indigo-300 border border-gray-700'
+                }`}
+                title="Pressione OK no controle para pausar"
+              >
+                {isPaused ? (
+                  <>
+                    <Pause className="h-3 w-3" />
+                    <span>PAUSADO</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3 w-3 text-green-400 fill-green-400" />
+                    <span>{secondsLeft}s</span>
+                  </>
+                )}
+              </div>
+
+              {/* Prev / Next / Pause Buttons */}
+              <div className="flex items-center gap-1 bg-gray-800/80 p-1 rounded-lg border border-gray-700/60">
+                <button
+                  onClick={goToPrevSlide}
+                  className="p-1 rounded hover:bg-gray-700 text-gray-300 hover:text-white"
+                  title="Slide Anterior (Seta ◀)"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setIsPaused((p) => !p)}
+                  className="p-1 rounded hover:bg-gray-700 text-gray-300 hover:text-white"
+                  title="Pausar / Continuar (Botão OK)"
+                >
+                  {isPaused ? <Play className="h-4 w-4 text-green-400" /> : <Pause className="h-4 w-4" />}
+                </button>
+                <button
+                  onClick={goToNextSlide}
+                  className="p-1 rounded hover:bg-gray-700 text-gray-300 hover:text-white"
+                  title="Próximo Slide (Seta ▶)"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Scale Adjuster */}
+              <div className="flex items-center gap-1 bg-gray-800/80 rounded-lg px-2 py-1 text-xs font-medium text-gray-300 border border-gray-700/60">
+                <button
+                  onClick={() => setZoom((z) => Math.max(40, z - 5))}
+                  className="px-1 py-0.5 rounded hover:bg-gray-700 font-bold"
+                  title="Diminuir escala"
+                >
+                  −
+                </button>
+                <span className="w-9 text-center font-bold text-indigo-400">{zoom}%</span>
+                <button
+                  onClick={() => setZoom((z) => Math.min(120, z + 5))}
+                  className="px-1 py-0.5 rounded hover:bg-gray-700 font-bold"
+                  title="Aumentar escala"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Exit TV Mode Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsTvMode(false)}
+                className="bg-gray-800 hover:bg-red-950/40 text-gray-300 hover:text-red-400 border-gray-700 flex items-center gap-1"
+                title="Sair do Modo TV (ESC)"
+              >
+                <X className="h-4 w-4" />
+                <span className="text-xs">Sair</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Progress bar do slide (60 segundos) */}
+          <div className="w-full bg-gray-800 h-0.5 overflow-hidden">
+            <div
+              className={`h-0.5 transition-all duration-1000 ${
+                isPaused ? 'bg-amber-400' : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-green-500'
+              }`}
+              style={{ width: `${(secondsLeft / 60) * 100}%` }}
+            ></div>
+          </div>
+        </header>
+
+        {/* Slide Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex-1 w-full">
+          {currentSlide === 0 && (
+            <div className="space-y-3">
+              <KPISummaryBlocks deals={deals} />
+              <ClientMovementBlocks deals={deals} />
+            </div>
+          )}
+
+          {currentSlide === 1 && (
+            <div>
+              <SheetKPIBlocks />
+            </div>
+          )}
+
+          {currentSlide === 2 && (
+            <div className="space-y-3">
+              {funnelData.length > 0 && <FunnelChart data={funnelData} actionRight={funnelDateFilter} />}
+              {funnelData.length > 0 && (
+                <div className="mt-2">
+                  <h2 className="text-sm font-bold text-white mb-2">Detalhamento do Funil</h2>
+                  <StageTable data={funnelData} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {currentSlide === 3 && (
+            <div className="space-y-4">
+              <ProspectingTable />
+              {(campaignPerformance.length > 0 || leadSources.length > 0) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {campaignPerformance.length > 0 && <CampaignChart data={campaignPerformance} />}
+                  {leadSources.length > 0 && <SourcePieChart data={leadSources} />}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* Bottom Helper Bar for Remote Controls */}
+        <footer className="bg-gray-900/80 border-t border-gray-800/80 py-1.5 px-4 text-center text-[11px] text-gray-500 flex items-center justify-center gap-4">
+          <span>🎮 <strong>Controle da TV:</strong> Pressione <strong>OK</strong> para Pausar/Continuar</span>
+          <span>•</span>
+          <span>Setas <strong>◀ / ▶</strong> para trocar de slide</span>
+          <span>•</span>
+          <span><strong>ESC</strong> ou Voltar para sair</span>
+        </footer>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // RENDERIZAÇÃO: MODO PADRÃO (DASHBOARD COMPLETO)
+  // ═══════════════════════════════════════════════════════════
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
@@ -172,6 +497,22 @@ function DashboardContent() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              {/* Botão para Iniciar Modo TV / Slides */}
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  setIsTvMode(true);
+                  setCurrentSlide(0);
+                  setSecondsLeft(60);
+                  setIsPaused(false);
+                }}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 shadow-sm"
+              >
+                <Tv className="h-4 w-4" />
+                <span className="font-semibold">Modo TV (Slides)</span>
+              </Button>
+
               <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-200">
                 <span className="text-[10px] text-gray-500 dark:text-gray-400 uppercase mr-1">Escala:</span>
                 <button
@@ -216,38 +557,7 @@ function DashboardContent() {
           {funnelData.length > 0 && (
             <FunnelChart 
               data={funnelData} 
-              actionRight={
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-500 font-medium px-1 uppercase">De</span>
-                    <input 
-                      type="date"
-                      className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 p-1 rounded-md border border-gray-200 dark:border-gray-700">
-                    <span className="text-[10px] text-gray-500 font-medium px-1 uppercase">Até</span>
-                    <input 
-                      type="date"
-                      className="bg-transparent text-gray-900 text-xs focus:ring-0 focus:outline-none dark:text-white"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
-                  </div>
-                  {(startDate || endDate) && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => { setStartDate(''); setEndDate(''); }} 
-                      className="text-gray-500 h-8 px-2"
-                    >
-                      Limpar
-                    </Button>
-                  )}
-                </div>
-              }
+              actionRight={funnelDateFilter}
             />
           )}
         </div>
