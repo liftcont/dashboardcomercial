@@ -208,9 +208,9 @@ function DashboardContent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <KPISummaryBlocks deals={deals} />
 
-        <SheetKPIBlocks />
-
         <ClientMovementBlocks deals={deals} />
+
+        <SheetKPIBlocks />
 
         <div className="mb-3">
           {funnelData.length > 0 && (
