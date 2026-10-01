@@ -42,8 +42,9 @@ import { ptBR } from 'date-fns/locale';
 const SLIDES = [
   { id: 0, title: 'Metas & Visão Executiva', label: '1. Visão Geral' },
   { id: 1, title: 'Evolução Mensal (Planilha 2026)', label: '2. Planilha' },
-  { id: 2, title: 'Funil Comercial de Vendas e Detalhamento', label: '3. Funil' },
-  { id: 3, title: 'Desempenho de Prospecção Ativa (Advogados)', label: '4. Prospecção' },
+  { id: 2, title: 'Gráfico do Funil de Vendas', label: '3. Funil de Vendas' },
+  { id: 3, title: 'Detalhamento das Etapas do Funil', label: '4. Detalhamento' },
+  { id: 4, title: 'Desempenho de Prospecção Ativa (Advogados)', label: '5. Prospecção' },
 ];
 
 function DashboardContent() {
@@ -433,18 +434,26 @@ function DashboardContent() {
           )}
 
           {currentSlide === 2 && (
-            <div className="space-y-3">
+            <div>
               {funnelData.length > 0 && <FunnelChart data={funnelData} actionRight={funnelDateFilter} />}
+            </div>
+          )}
+
+          {currentSlide === 3 && (
+            <div className="space-y-3">
               {funnelData.length > 0 && (
-                <div className="mt-2">
-                  <h2 className="text-sm font-bold text-white mb-2">Detalhamento do Funil</h2>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold text-white">Detalhamento das Etapas do Funil</h2>
+                    {funnelDateFilter}
+                  </div>
                   <StageTable data={funnelData} />
                 </div>
               )}
             </div>
           )}
 
-          {currentSlide === 3 && (
+          {currentSlide === 4 && (
             <div className="space-y-4">
               <ProspectingTable />
               {(campaignPerformance.length > 0 || leadSources.length > 0) && (
