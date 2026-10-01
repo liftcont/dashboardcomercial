@@ -21,16 +21,16 @@ export function ProspectingTable() {
     const sourceName = d.deal_source?.name?.toLowerCase() || '';
     if (!sourceName.includes('advogado')) return false;
 
-    let isValid = true;
-    const createdAt = d.created_at.split('T')[0];
-    const updatedAt = d.updated_at ? d.updated_at.split('T')[0] : null;
+    const createdAt = d.created_at ? d.created_at.split('T')[0] : '';
+    if (!createdAt) return false;
 
+    let isValid = true;
     if (localStartDate && localEndDate) {
-      isValid = (createdAt >= localStartDate && createdAt <= localEndDate) || (updatedAt !== null && updatedAt >= localStartDate && updatedAt <= localEndDate);
+      isValid = createdAt >= localStartDate && createdAt <= localEndDate;
     } else if (localStartDate) {
-      isValid = (createdAt >= localStartDate) || (updatedAt !== null && updatedAt >= localStartDate);
+      isValid = createdAt >= localStartDate;
     } else if (localEndDate) {
-      isValid = (createdAt <= localEndDate) || (updatedAt !== null && updatedAt <= localEndDate);
+      isValid = createdAt <= localEndDate;
     }
     return Boolean(isValid);
   });

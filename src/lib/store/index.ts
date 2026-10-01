@@ -193,25 +193,17 @@ export const useRDStationStore = create<RDStationState>()(
         const { deals, funnelStages, startDate, endDate } = get();
         
         const filteredDeals = deals.filter(d => {
-          let isValid = true;
-          const createdAt = d.created_at.split('T')[0];
-          const updatedAt = d.updated_at ? d.updated_at.split('T')[0] : null;
+          const createdAt = d.created_at ? d.created_at.split('T')[0] : '';
+          if (!createdAt) return false;
 
-          // Simple logic: if deal was created or updated within the range
           if (startDate && endDate) {
-             const matchCreated = createdAt >= startDate && createdAt <= endDate;
-             const matchUpdated = updatedAt ? (updatedAt >= startDate && updatedAt <= endDate) : false;
-             isValid = matchCreated || matchUpdated;
+            return createdAt >= startDate && createdAt <= endDate;
           } else if (startDate) {
-             const matchCreated = createdAt >= startDate;
-             const matchUpdated = updatedAt ? updatedAt >= startDate : false;
-             isValid = matchCreated || matchUpdated;
+            return createdAt >= startDate;
           } else if (endDate) {
-             const matchCreated = createdAt <= endDate;
-             const matchUpdated = updatedAt ? updatedAt <= endDate : false;
-             isValid = matchCreated || matchUpdated;
+            return createdAt <= endDate;
           }
-          return isValid;
+          return true;
         });
         
         const data: FunnelData[] = funnelStages.map((stage) => {
