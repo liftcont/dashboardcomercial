@@ -17,6 +17,7 @@ export function useDashboard() {
     selectedPipelineId,
     startDate,
     endDate,
+    sourceFilter,
     metrics,
     funnelData,
     campaignPerformance,
@@ -32,6 +33,7 @@ export function useDashboard() {
     setSelectedPipelineId,
     setStartDate,
     setEndDate,
+    setSourceFilter,
     setLoading,
     setError,
     computeMetrics,
@@ -126,7 +128,7 @@ export function useDashboard() {
       computeMetrics();
       computeFunnelData();
     }
-  }, [startDate, endDate, deals]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, sourceFilter, deals]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getAuthUrl = useCallback(() => {
     return null;
@@ -144,9 +146,11 @@ export function useDashboard() {
     selectedPipelineId,
     startDate,
     endDate,
+    sourceFilter,
     setSelectedPipelineId,
     setStartDate,
     setEndDate,
+    setSourceFilter,
     metrics,
     funnelData,
     campaignPerformance,

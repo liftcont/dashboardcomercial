@@ -27,6 +27,8 @@ export interface RDStationState {
   selectedPipelineId: string | null;
   startDate: string;
   endDate: string;
+  sourceFilter: 'all' | 'anuncio' | 'organico';
+  setSourceFilter: (filter: 'all' | 'anuncio' | 'organico') => void;
 
   metrics: DashboardMetrics | null;
   funnelData: FunnelData[];
@@ -96,6 +98,7 @@ export const useRDStationStore = create<RDStationState>()(
       selectedPipelineId: null,
       startDate: defaultStartDate,
       endDate: defaultEndDate,
+      sourceFilter: 'all',
 
       metrics: null,
       funnelData: [],
@@ -147,6 +150,10 @@ export const useRDStationStore = create<RDStationState>()(
       setSelectedPipelineId: (selectedPipelineId) => set({ selectedPipelineId }),
       setStartDate: (startDate) => set({ startDate }),
       setEndDate: (endDate) => set({ endDate }),
+      setSourceFilter: (sourceFilter) => {
+        set({ sourceFilter });
+        get().computeFunnelData();
+      },
 
       setMetrics: (metrics) => set({ metrics }),
       setFunnelData: (funnelData) => set({ funnelData }),
@@ -190,19 +197,39 @@ export const useRDStationStore = create<RDStationState>()(
       },
 
       computeFunnelData: () => {
-        const { deals, funnelStages, startDate, endDate } = get();
+        const { deals, funnelStages, startDate, endDate, sourceFilter } = get();
         
         const filteredDeals = deals.filter(d => {
           const createdAt = d.created_at ? d.created_at.split('T')[0] : '';
           if (!createdAt) return false;
 
+          let matchDate = true;
           if (startDate && endDate) {
-            return createdAt >= startDate && createdAt <= endDate;
+            matchDate = createdAt >= startDate && createdAt <= endDate;
           } else if (startDate) {
-            return createdAt >= startDate;
+            matchDate = createdAt >= startDate;
           } else if (endDate) {
-            return createdAt <= endDate;
+            matchDate = createdAt <= endDate;
           }
+          if (!matchDate) return false;
+
+          if (sourceFilter && sourceFilter !== 'all') {
+            const rawSourceName = d.deal_source?.name || '';
+            const normalized = rawSourceName
+              .toLowerCase()
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .trim();
+            const isAd = normalized.includes('anuncio');
+
+            if (sourceFilter === 'anuncio' && !isAd) {
+              return false;
+            }
+            if (sourceFilter === 'organico' && isAd) {
+              return false;
+            }
+          }
+
           return true;
         });
         

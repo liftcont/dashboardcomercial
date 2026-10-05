@@ -23,15 +23,19 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 interface FunnelChartProps {
   data: FunnelData[];
   actionRight?: React.ReactNode;
+  actionLeft?: React.ReactNode;
 }
 
-export function FunnelChart({ data, actionRight }: FunnelChartProps) {
+export function FunnelChart({ data, actionRight, actionLeft }: FunnelChartProps) {
   const maxCount = Math.max(...data.map((d) => d.count), 1);
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle>Funil de Vendas</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-2 flex-wrap gap-2">
+        <div className="flex items-center gap-3">
+          <CardTitle>Funil de Vendas</CardTitle>
+          {actionLeft && <div>{actionLeft}</div>}
+        </div>
         {actionRight && <div className="font-normal">{actionRight}</div>}
       </CardHeader>
       <CardContent>

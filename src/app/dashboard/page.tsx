@@ -64,9 +64,11 @@ function DashboardContent() {
     selectedPipelineId,
     startDate,
     endDate,
+    sourceFilter,
     setSelectedPipelineId,
     setStartDate,
     setEndDate,
+    setSourceFilter,
     fetchAllData,
     handleAuthCallback,
     getAuthUrl,
@@ -281,6 +283,44 @@ function DashboardContent() {
     </div>
   );
 
+  const funnelSourceFilter = (
+    <div className="flex items-center p-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 text-xs shadow-inner">
+      <button
+        type="button"
+        onClick={() => setSourceFilter('all')}
+        className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+          sourceFilter === 'all'
+            ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+        }`}
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        onClick={() => setSourceFilter('anuncio')}
+        className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+          sourceFilter === 'anuncio'
+            ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+        }`}
+      >
+        Anúncio
+      </button>
+      <button
+        type="button"
+        onClick={() => setSourceFilter('organico')}
+        className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+          sourceFilter === 'organico'
+            ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+        }`}
+      >
+        Orgânico
+      </button>
+    </div>
+  );
+
   // ═══════════════════════════════════════════════════════════
   // RENDERIZAÇÃO: MODO TV (SLIDES AUTOMÁTICOS)
   // ═══════════════════════════════════════════════════════════
@@ -435,7 +475,13 @@ function DashboardContent() {
 
           {currentSlide === 2 && (
             <div>
-              {funnelData.length > 0 && <FunnelChart data={funnelData} actionRight={funnelDateFilter} />}
+              {funnelData.length > 0 && (
+                <FunnelChart 
+                  data={funnelData} 
+                  actionRight={funnelDateFilter} 
+                  actionLeft={funnelSourceFilter} 
+                />
+              )}
             </div>
           )}
 
@@ -443,8 +489,11 @@ function DashboardContent() {
             <div className="space-y-3">
               {funnelData.length > 0 && (
                 <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold text-white">Detalhamento das Etapas do Funil</h2>
+                  <div className="flex flex-wrap items-center justify-between mb-3 gap-2">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-lg font-bold text-white">Detalhamento das Etapas do Funil</h2>
+                      {funnelSourceFilter}
+                    </div>
                     {funnelDateFilter}
                   </div>
                   <StageTable data={funnelData} />
@@ -567,6 +616,7 @@ function DashboardContent() {
             <FunnelChart 
               data={funnelData} 
               actionRight={funnelDateFilter}
+              actionLeft={funnelSourceFilter}
             />
           )}
         </div>
@@ -575,7 +625,13 @@ function DashboardContent() {
 
         {funnelData.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Detalhamento do Funil</h2>
+            <div className="flex flex-wrap items-center justify-between mb-4 gap-2">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Detalhamento do Funil</h2>
+                {funnelSourceFilter}
+              </div>
+              {funnelDateFilter}
+            </div>
             <StageTable data={funnelData} />
           </div>
         )}
